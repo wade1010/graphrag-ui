@@ -949,7 +949,7 @@ html, body {
 }
 
 :root {
-    --color-background: #2C3639;
+    --color-background: #ffffff;
     --color-foreground: #3F4E4F;
     --color-accent: #A27B5C;
     --color-text: #DCD7C9;
@@ -1783,4 +1783,4 @@ app = demo.app
 
 if __name__ == "__main__":
     initialize_data()
-    demo.launch(server_port=7861, share=False)
+    demo.launch(server_port=7862, share=False)

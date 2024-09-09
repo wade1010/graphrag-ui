@@ -42,6 +42,7 @@ class IndexingRequest(BaseModel):
 
 class PromptTuneRequest(BaseModel):
     root: str = "./{ROOT_DIR}"
+    config: str = "./{ROOT_DIR}/settings.yaml"
     domain: Optional[str] = None
     method: str = "random"
     limit: int = 15
@@ -459,7 +460,7 @@ def start_prompt_tuning(request: PromptTuneRequest):
     url = f"{API_BASE_URL}/v1/prompt_tune"
     
     try:
-        response = requests.post(url, json=request.dict())
+        response = requests.post(url, json=request.model_dump())
         response.raise_for_status()
         result = response.json()
         return result['message'], gr.update(interactive=False)
@@ -716,6 +717,10 @@ body, .gradio-container {
     cursor: pointer;
 }
 
+.pointer-cursor {
+    cursor: pointer;
+}
+
 .setting-accordion .icon {
     transition: transform 0.3s ease;
 }
@@ -784,6 +789,21 @@ def create_interface():
                                 interactive=True
                             )
                             custom_args = gr.Textbox(label="Custom CLI Arguments", placeholder="--arg1 value1 --arg2 value2")
+                            import textwrap
+                            cli_guide = gr.Markdown(
+                                textwrap.dedent("""
+                                ### CLI Argument Key Guide:
+                                - `--root <path>`: Set the root directory for the project
+                                - `--config <path>`: Specify a custom configuration file
+                                - `--verbose`: Enable verbose output
+                                - `--nocache`: Disable caching
+                                - `--resume <timestamp>`: Resume from a specific timestamp
+                                - `--reporter <type>`: Set the reporter type (rich, print, none)
+                                - `--emit <formats>`: Specify output formats (json, csv, parquet)
+                                
+                                Example: `--verbose --nocache --emit json,csv`
+                                """)
+                            )
                     
                     with gr.Column(scale=1):
                         gr.Markdown("## Indexing Output")
@@ -800,15 +820,17 @@ def create_interface():
                         gr.Markdown("## Prompt Tuning Configuration")
                         
                         pt_root = gr.Textbox(label="Root Directory", value=f"{ROOT_DIR}", interactive=True)
-                        pt_domain = gr.Textbox(label="Domain (optional)")
+                        pt_config = gr.Textbox(label="Config File", value=f"{ROOT_DIR}/settings.yaml", interactive=True)
+                        pt_domain = gr.Textbox(label="Domain", placeholder="optional")
                         pt_method = gr.Dropdown(
                             label="Method",
                             choices=["random", "top", "all"],
                             value="random",
-                            interactive=True
+                            interactive=True,
+                            elem_classes="pointer-cursor"
                         )
                         pt_limit = gr.Number(label="Limit", value=15, precision=0, interactive=True)
-                        pt_language = gr.Textbox(label="Language (optional)")
+                        pt_language = gr.Textbox(label="Language", placeholder="optional. eg: Chinese、Vietnamese", interactive=True)
                         pt_max_tokens = gr.Number(label="Max Tokens", value=2000, precision=0, interactive=True)
                         pt_chunk_size = gr.Number(label="Chunk Size", value=200, precision=0, interactive=True)
                         pt_no_entity_types = gr.Checkbox(label="No Entity Types", value=False)
@@ -902,27 +924,51 @@ def create_interface():
             outputs=[index_status, index_output]
         )
 
-        def create_prompt_tune_request():
+        # def create_prompt_tune_request():
+        #     return PromptTuneRequest(
+        #         root=pt_root.value,
+        #         config=pt_config.value,
+        #         domain=pt_domain.value if pt_domain.value else None,
+        #         method=pt_method.value,
+        #         limit=int(pt_limit.value),
+        #         language=pt_language.value if pt_language.value else None,
+        #         max_tokens=int(pt_max_tokens.value),
+        #         chunk_size=int(pt_chunk_size.value),
+        #         no_entity_types=pt_no_entity_types.value,
+        #         output=pt_output_dir.value
+        #     )
+        def create_prompt_tune_request(root, config, domain, method, limit, language, max_tokens, chunk_size, no_entity_types, output):
             return PromptTuneRequest(
-                root=pt_root.value,
-                domain=pt_domain.value if pt_domain.value else None,
-                method=pt_method.value,
-                limit=int(pt_limit.value),
-                language=pt_language.value if pt_language.value else None,
-                max_tokens=int(pt_max_tokens.value),
-                chunk_size=int(pt_chunk_size.value),
-                no_entity_types=pt_no_entity_types.value,
-                output=pt_output_dir.value
+                root=root,
+                config=config,
+                domain=domain if domain else None,
+                method=method,
+                limit=int(limit),
+                language=language if language else None,
+                max_tokens=int(max_tokens),
+                chunk_size=int(chunk_size),
+                no_entity_types=no_entity_types,
+                output=output
             )
 
-        def update_pt_output(request):
+        # def update_pt_output(request):
+        #     result, button_update = start_prompt_tuning(request)
+        #     return result, button_update, gr.update(value=f"Request: {request.dict()}")
+        
+        def update_pt_output(pt_root, pt_config, pt_domain, pt_method, pt_limit, pt_language, pt_max_tokens, pt_chunk_size, pt_no_entity_types, pt_output_dir):
+            request = create_prompt_tune_request(
+                pt_root, pt_config, pt_domain, pt_method, pt_limit, pt_language, pt_max_tokens, pt_chunk_size, pt_no_entity_types, pt_output_dir
+            )
             result, button_update = start_prompt_tuning(request)
             return result, button_update, gr.update(value=f"Request: {request.dict()}")
 
-        run_pt_button.click(
-            lambda: update_pt_output(create_prompt_tune_request()),
-            outputs=[pt_output, run_pt_button, pt_status]
-        )
+
+        # run_pt_button.click(
+        #     lambda: update_pt_output(create_prompt_tune_request()),
+        #     outputs=[pt_output, run_pt_button, pt_status]
+        # )
+        run_pt_button.click(update_pt_output, inputs=[pt_root, pt_config, pt_domain, pt_method, pt_limit, pt_language, pt_max_tokens, pt_chunk_size, pt_no_entity_types, pt_output_dir], outputs=[pt_output, run_pt_button, pt_status])
+
 
         check_pt_status_button.click(
             check_prompt_tuning_status,

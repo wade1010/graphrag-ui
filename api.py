@@ -722,6 +722,7 @@ async def list_models():
 
 class PromptTuneRequest(BaseModel):
     root: str = "./{ROOT_DIR}"
+    config: str = "./{ROOT_DIR}/settings.yaml"
     domain: Optional[str] = None
     method: str = "random"
     limit: int = 15
@@ -747,7 +748,8 @@ async def run_prompt_tuning(request: PromptTuneRequest):
         root_path = os.path.expandvars(request.root)
         
         cmd.extend(["--root", root_path])
-        cmd.extend(["--method", request.method])
+        cmd.extend(["--config", request.config])
+        cmd.extend(["--selection-method", request.method])
         cmd.extend(["--limit", str(request.limit)])
         
         if request.domain:
