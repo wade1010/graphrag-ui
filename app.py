@@ -1783,4 +1783,4 @@ app = demo.app
 
 if __name__ == "__main__":
     initialize_data()
-    demo.launch(server_port=7860, share=True)
+    demo.launch(server_port=7861, share=False)
