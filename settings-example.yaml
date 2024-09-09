@@ -2,55 +2,61 @@
 encoding_model: cl100k_base
 skip_workflows: []
 llm:
-  api_key: ${GRAPHRAG_API_KEY}
-  type: openai_chat # or azure_openai_chat
-  model: mistral-nemo:12b-instruct-2407-fp16
+  api_key: ${LLM_API_KEY}
+  type: ${LLM_SERVICE_TYPE} # or azure_openai_chat
+  model: ${LLM_MODEL}
+  api_base: ${LLM_API_BASE}
   model_supports_json: true # recommended if this is available for your model.
-  max_tokens: 8192
+  # max_tokens: 4000
   # request_timeout: 180.0
-  api_base: http://localhost:11434/v1
+  # api_base: https://<instance>.openai.azure.com
   # api_version: 2024-02-15-preview
   # organization: <organization_id>
   # deployment_name: <azure_model_deployment_name>
   # tokens_per_minute: 150_000 # set a leaky bucket throttle
   # requests_per_minute: 10_000 # set a leaky bucket throttle
-  max_retries: 3
+  # max_retries: 10
   # max_retry_wait: 10.0
   # sleep_on_rate_limit_recommendation: true # whether to sleep when azure suggests wait-times
-  concurrent_requests: 25 # the number of parallel inflight requests that may be made
+  # concurrent_requests: 25 # the number of parallel inflight requests that may be made
+  # temperature: 0 # temperature for sampling
+  # top_p: 1 # top-p sampling
+  # n: 1 # Number of completions to generate
 
 parallelization:
   stagger: 0.3
-  num_threads: 50 # the number of threads to use for parallel processing
+  # num_threads: 50 # the number of threads to use for parallel processing
 
 async_mode: threaded # or asyncio
 
 embeddings:
   ## parallelization: override the global parallelization settings for embeddings
   async_mode: threaded # or asyncio
+  # target: required # or all
   llm:
-    api_key: ${GRAPHRAG_API_KEY}
-    type: openai_embedding # or azure_openai_embedding
-    model: nomic-embed-text:latest
-    api_base: http://localhost:11434/api
+    api_key: ${EMBEDDINGS_API_KEY}
+    type: ${EMBEDDINGS_SERVICE_TYPE} # or azure_openai_embedding
+    model: ${EMBEDDINGS_MODEL}
+    api_base: ${EMBEDDINGS_API_BASE}
+    # api_base: https://<instance>.openai.azure.com
     # api_version: 2024-02-15-preview
     # organization: <organization_id>
     # deployment_name: <azure_model_deployment_name>
     # tokens_per_minute: 150_000 # set a leaky bucket throttle
     # requests_per_minute: 10_000 # set a leaky bucket throttle
-    max_retries: 3
+    # max_retries: 10
     # max_retry_wait: 10.0
     # sleep_on_rate_limit_recommendation: true # whether to sleep when azure suggests wait-times
-    concurrent_requests: 25 # the number of parallel inflight requests that may be made
-    #batch_size: 1 # the number of documents to send in a single request
-    #batch_max_tokens: 4000 # the maximum number of tokens to send in a single request
-    # target: required # or optional
+    # concurrent_requests: 25 # the number of parallel inflight requests that may be made
+    # batch_size: 16 # the number of documents to send in a single request
+    # batch_max_tokens: 8191 # the maximum number of tokens to send in a single request
+    
   
 
 
 chunks:
-  size: 512
-  overlap: 64
+  size: 1200
+  overlap: 100
   group_by_columns: [id] # by default, we don't allow chunks to cross documents
     
 input:
@@ -84,7 +90,7 @@ entity_extraction:
   ## async_mode: override the global async_mode settings for this task
   prompt: "prompts/entity_extraction.txt"
   entity_types: [organization,person,geo,event]
-  max_gleanings: 0
+  max_gleanings: 1
 
 summarize_descriptions:
   ## llm: override the global llm settings for this task
@@ -97,10 +103,10 @@ claim_extraction:
   ## llm: override the global llm settings for this task
   ## parallelization: override the global parallelization settings for this task
   ## async_mode: override the global async_mode settings for this task
-  # enabled: true
+  enabled: true
   prompt: "prompts/claim_extraction.txt"
   description: "Any claims or facts that could be relevant to information discovery."
-  max_gleanings: 0
+  max_gleanings: 1
 
 community_reports:
   ## llm: override the global llm settings for this task
@@ -108,7 +114,7 @@ community_reports:
   ## async_mode: override the global async_mode settings for this task
   prompt: "prompts/community_report.txt"
   max_length: 2000
-  max_input_length: 4000
+  max_input_length: 8000
 
 cluster_graph:
   max_cluster_size: 10
@@ -135,9 +141,15 @@ local_search:
   # conversation_history_max_turns: 5
   # top_k_mapped_entities: 10
   # top_k_relationships: 10
+  # llm_temperature: 0 # temperature for sampling
+  # llm_top_p: 1 # top-p sampling
+  # llm_n: 1 # Number of completions to generate
   # max_tokens: 12000
 
 global_search:
+  # llm_temperature: 0 # temperature for sampling
+  # llm_top_p: 1 # top-p sampling
+  # llm_n: 1 # Number of completions to generate
   # max_tokens: 12000
   # data_max_tokens: 12000
   # map_max_tokens: 1000
