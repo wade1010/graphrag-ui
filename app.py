@@ -64,13 +64,23 @@ warnings.filterwarnings("ignore", category=UserWarning, module="gradio_client.do
 
 load_dotenv('indexing/.env')
 
-# Set default values for API-related environment variables
-os.environ.setdefault("LLM_API_BASE", os.getenv("LLM_API_BASE"))
-os.environ.setdefault("LLM_API_KEY", os.getenv("LLM_API_KEY"))
-os.environ.setdefault("LLM_MODEL", os.getenv("LLM_MODEL"))
-os.environ.setdefault("EMBEDDINGS_API_BASE", os.getenv("EMBEDDINGS_API_BASE"))
-os.environ.setdefault("EMBEDDINGS_API_KEY", os.getenv("EMBEDDINGS_API_KEY"))
-os.environ.setdefault("EMBEDDINGS_MODEL", os.getenv("EMBEDDINGS_MODEL"))
+# LLM 相关配置
+LLM_API_BASE = os.getenv('LLM_API_BASE')
+LLM_MODEL = os.getenv('LLM_MODEL')
+LLM_API_KEY = os.getenv('LLM_API_KEY')
+LLM_SERVICE_TYPE = os.getenv('LLM_SERVICE_TYPE')
+
+# EMBEDDINGS 相关配置
+EMBEDDINGS_API_BASE = os.getenv('EMBEDDINGS_API_BASE')
+EMBEDDINGS_MODEL = os.getenv('EMBEDDINGS_MODEL')
+EMBEDDINGS_API_KEY = os.getenv('EMBEDDINGS_API_KEY')
+EMBEDDINGS_SERVICE_TYPE = os.getenv('EMBEDDINGS_SERVICE_TYPE')
+
+# 其他配置
+ROOT_DIR = os.getenv('ROOT_DIR', 'indexing')
+INPUT_DIR = os.getenv('INPUT_DIR')
+
+
 
 # Add the project root to the Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -99,53 +109,42 @@ logging.getLogger().addHandler(queue_handler)
 
 def initialize_models():
     global llm, text_embedder
-    
-    llm_api_base = os.getenv("LLM_API_BASE")
-    llm_api_key = os.getenv("LLM_API_KEY")
-    embeddings_api_base = os.getenv("EMBEDDINGS_API_BASE")
-    embeddings_api_key = os.getenv("EMBEDDINGS_API_KEY")
-    
-    llm_service_type = os.getenv("LLM_SERVICE_TYPE", "openai_chat").lower()  # Provide a default and lower it
-    embeddings_service_type = os.getenv("EMBEDDINGS_SERVICE_TYPE", "openai").lower()  # Provide a default and lower it
-    
-    llm_model = os.getenv("LLM_MODEL")
-    embeddings_model = os.getenv("EMBEDDINGS_MODEL")
-    
     logging.info("Fetching models...")
-    models = fetch_models(llm_api_base, llm_api_key, llm_service_type)
+    models = fetch_models(LLM_API_BASE, LLM_API_KEY, LLM_SERVICE_TYPE)
     
     # Use the same models list for both LLM and embeddings
     llm_models = models
     embeddings_models = models
     
     # Initialize LLM
-    if llm_service_type == "openai_chat":
+    if LLM_SERVICE_TYPE == "openai_chat":
         llm = ChatOpenAI(
-            api_key=llm_api_key,
-            api_base=f"{llm_api_base}/v1",
-            model=llm_model,
+            api_key=LLM_API_KEY,
+            api_base=f"{LLM_API_BASE}/v1",
+            model=LLM_MODEL,
             api_type=OpenaiApiType.OpenAI,
             max_retries=20,
         )
     # Initialize OpenAI client for embeddings
     openai_client = OpenAI(
-        api_key=embeddings_api_key or "dummy_key",
-        base_url=f"{embeddings_api_base}/v1"
+        api_key=EMBEDDINGS_API_KEY or "dummy_key",
+        base_url=f"{EMBEDDINGS_API_BASE}/v1"
     )
 
     # Initialize text embedder using OpenAIEmbeddingsLLM
     text_embedder = OpenAIEmbeddingsLLM(
         client=openai_client,
         configuration={
-            "model": embeddings_model,
+            "model": EMBEDDINGS_MODEL,
             "api_type": "open_ai",
-            "api_base": embeddings_api_base,
-            "api_key": embeddings_api_key or None,
-            "provider": embeddings_service_type
+            "api_base": EMBEDDINGS_API_BASE,
+            "api_key": EMBEDDINGS_API_KEY or None,
+            "provider": EMBEDDINGS_SERVICE_TYPE
         }
     )
     
-    return llm_models, embeddings_models, llm_service_type, embeddings_service_type, llm_api_base, embeddings_api_base, text_embedder
+    return llm_models, embeddings_models, 1, 1, 1, 1, text_embedder
+    # return llm_models, embeddings_models, llm_service_type, embeddings_service_type, llm_api_base, embeddings_api_base, text_embedder
 
 def find_latest_output_folder():
     root_dir = "./indexing/output"
@@ -251,7 +250,7 @@ def wait_for_api_server(port):
 
 def load_settings():
     try:
-        with open("indexing/settings.yaml", "r") as f:
+        with open(f"{ROOT_DIR}/settings.yaml", "r") as f:
             return yaml.safe_load(f) or {}
     except FileNotFoundError:
         return {}
@@ -1197,12 +1196,49 @@ def refresh_indexing():
 
 
 def run_indexing(root_dir, config_file, verbose, nocache, resume, reporter, emit_formats, custom_args):
-    cmd = ["python", "-m", "graphrag.index", "--root", "./indexing"]
-    
+    if not root_dir or root_dir == '.' or root_dir == './':
+        root_dir = './indexing'
+    elif not os.path.exists(root_dir):
+        logging.error(f"Root directory '{root_dir}' does not exist.")
+        return ("\n".join(["Root directory does not exist."]),
+                "Root directory does not exist.",
+                100,
+                gr.update(interactive=True),
+                gr.update(interactive=False),
+                gr.update(interactive=True),
+                "0")
+
+    # Set default config_file if None
+    if not config_file:
+        config_file = "settings.yaml"
+    elif not os.path.exists(config_file):
+        logging.error(f"Config file '{config_file}' does not exist.")
+        return ("\n".join([f"Config file '{config_file}' does not exist."]),
+                f"Config file '{config_file}' does not exist.",
+                100,
+                gr.update(interactive=True),
+                gr.update(interactive=False),
+                gr.update(interactive=True),
+                "0")
+                
+    cmd = ["python", "-m", "graphrag.index", "--root", root_dir, "--config", config_file]
+
+    # Add other CLI arguments
+    if verbose:
+        cmd.append("--verbose")
+    if nocache:
+        cmd.append("--nocache")
+    if resume:
+        cmd.extend(["--resume", resume])
+    if reporter:
+        cmd.extend(["--reporter", reporter])
+    if emit_formats:
+        cmd.extend(["--emit", ','.join(emit_formats)])
+
     # Add custom CLI arguments
     if custom_args:
         cmd.extend(custom_args.split())
-    
+
     logging.info(f"Executing command: {' '.join(cmd)}")
     
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, encoding='utf-8', universal_newlines=True)
@@ -1312,7 +1348,7 @@ def create_gradio_interface():
                         
 
                     with gr.TabItem("Indexing"):
-                        root_dir = gr.Textbox(label="Root Directory", value="./")
+                        root_dir = gr.Textbox(label="Root Directory", value=f"./{ROOT_DIR}")
                         config_file = gr.File(label="Config File (optional)")
                         with gr.Row():
                             verbose = gr.Checkbox(label="Verbose", value=True)
@@ -1374,7 +1410,7 @@ def create_gradio_interface():
                         )
 
                     with gr.TabItem("Indexing Outputs/Visuals"):
-                        output_folder_list = gr.Dropdown(label="Select Output Folder (Select GraphML File to Visualize)", choices=list_output_folders("./indexing"), interactive=True)
+                        output_folder_list = gr.Dropdown(label="Select Output Folder (Select GraphML File to Visualize)", choices=list_output_folders(ROOT_DIR), interactive=True)
                         refresh_folder_btn = gr.Button("Refresh Folder List", variant="secondary")
                         initialize_folder_btn = gr.Button("Initialize Selected Folder", variant="primary")
                         folder_content_list = gr.Dropdown(label="Select File or Directory", choices=[], interactive=True)
