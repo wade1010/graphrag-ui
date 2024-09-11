@@ -750,7 +750,17 @@ def update_model_choices(base_url, api_key, service_type, settings_key):
         logging.warning(f"No models fetched for {service_type}.")
 
     # Get the current model from settings
-    current_model = settings.get(settings_key, {}).get('llm', {}).get('model')
+    if settings_key=='llm':
+        current_model = settings.get(settings_key, {}).get('model')
+    else:
+        current_model = settings.get(settings_key, {}).get('llm').get('model')
+
+    match = re.match(r'\$\{(.+)\}', current_model)
+    if match:
+        # Extract the variable name
+        variable_name = match.group(1)
+        # Get the value from the variable
+        current_model = globals().get(variable_name) or locals().get(variable_name)
     
     # If the current model is not in the list, add it
     if current_model and current_model not in models:
@@ -771,27 +781,25 @@ def update_llm_settings(llm_model, embeddings_model, context_window, system_mess
                         llm_api_base, llm_api_key, 
                         embeddings_api_base, embeddings_api_key, embeddings_service_type):
     try:
-        # Update settings.yaml
-        settings = load_settings()
-        settings['llm'].update({
-            "type": "openai",  # Always set to "openai" since we removed the radio button
-            "model": llm_model,
-            "api_base": llm_api_base,
-            "api_key": "${GRAPHRAG_API_KEY}",
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-            "provider": "openai_chat"  # Always set to "openai_chat"
-        })
-        settings['embeddings']['llm'].update({
-            "type": "openai_embedding",  # Always use OpenAIEmbeddingsLLM
-            "model": embeddings_model,
-            "api_base": embeddings_api_base,
-            "api_key": "${GRAPHRAG_API_KEY}",
-            "provider": embeddings_service_type
-        })
+        # 2024-9-11 10:55:57 There is no need to modify it here
+        # # Update settings.yaml
+        # settings = load_settings()
+        # settings['llm'].update({
+        #     "model": llm_model,
+        #     "api_base": llm_api_base,
+        #     "api_key": llm_api_key,
+        #     "temperature": temperature,
+        #     "max_tokens": max_tokens,
+        # })
+        # settings['embeddings']['llm'].update({
+        #     "model": embeddings_model,
+        #     "api_base": embeddings_api_base,
+        #     "api_key": embeddings_api_key,
+        #     "provider": embeddings_service_type
+        # })
         
-        with open("indexing/settings.yaml", 'w') as f:
-            yaml.dump(settings, f, default_flow_style=False)
+        # with open(f"{ROOT_DIR}/settings.yaml", 'w') as f:
+        #     yaml.dump(settings, f, default_flow_style=False)
         
         # Update .env file
         update_env_file("LLM_API_BASE", llm_api_base)
@@ -804,8 +812,6 @@ def update_llm_settings(llm_model, embeddings_model, context_window, system_mess
         update_env_file("SYSTEM_MESSAGE", system_message)
         update_env_file("TEMPERATURE", str(temperature))
         update_env_file("MAX_TOKENS", str(max_tokens))
-        update_env_file("LLM_SERVICE_TYPE", "openai_chat")
-        update_env_file("EMBEDDINGS_SERVICE_TYPE", embeddings_service_type)
         
         # Reload environment variables
         load_dotenv(override=True)
@@ -1522,18 +1528,12 @@ def create_gradio_interface():
                             fn=update_model_choices,
                             inputs=[llm_base_url, llm_api_key, llm_service_type, gr.Textbox(value='llm', visible=False)],
                             outputs=[llm_model_dropdown]
-                        ).then(
-                            fn=update_logs,
-                            outputs=[log_output]
                         )
 
                         refresh_embeddings_models_btn.click(
                             fn=update_model_choices,
                             inputs=[embeddings_base_url, embeddings_api_key, embeddings_service_type, gr.Textbox(value='embeddings', visible=False)],
                             outputs=[embeddings_model_dropdown]
-                        ).then(
-                            fn=update_logs,
-                            outputs=[log_output]
                         )
 
                     with gr.TabItem("YAML Settings"):
@@ -1760,18 +1760,6 @@ def create_gradio_interface():
                 selected_folder
             ],
             outputs=[chatbot, query_input, log_output]
-        )
-        refresh_llm_models_btn.click(
-            fn=update_model_choices,
-            inputs=[llm_base_url, llm_api_key, llm_service_type, gr.Textbox(value='llm', visible=False)],
-            outputs=[llm_model_dropdown]
-        )
-
-        # Update Embeddings model choices
-        refresh_embeddings_models_btn.click(
-            fn=update_model_choices,
-            inputs=[embeddings_base_url, embeddings_api_key, embeddings_service_type, gr.Textbox(value='embeddings', visible=False)],
-            outputs=[embeddings_model_dropdown]
         )
         
         # Add this JavaScript to enable Shift+Enter functionality
