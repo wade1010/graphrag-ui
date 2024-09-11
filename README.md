@@ -1,5 +1,5 @@
 
-English | [简体中文](./README.md)
+English | [简体中文](./README-CN.md)
 
 # GraphRAG-UI
 
