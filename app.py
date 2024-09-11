@@ -421,13 +421,13 @@ def construct_cli_args(query_type, preset, community_level, response_type, custo
     if not selected_folder:
         raise ValueError("No folder selected. Please select an output folder before querying.")
 
-    artifacts_folder = os.path.join("./indexing/output", selected_folder, "artifacts")
+    artifacts_folder = os.path.join(f"./{ROOT_DIR}/output", selected_folder, "artifacts")
     if not os.path.exists(artifacts_folder):
         raise ValueError(f"Artifacts folder not found in {artifacts_folder}")
 
     base_args = [
         "python", "-m", "graphrag.query",
-        "--data", artifacts_folder,
+        "--root", ROOT_DIR,
         "--method", query_type,
     ]
 
