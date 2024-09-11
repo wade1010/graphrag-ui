@@ -22,7 +22,7 @@ GraphRAG-UI 是 [GraphRAG](https://github.com/microsoft/graphrag) 的用户友�
 
 ![GraphRAG UI](./assets/image1.png)
 
-### 图可视化
+### 图可视化 (GIF 图)
 
 ![GraphRAG UI](./assets/image2.gif)
 

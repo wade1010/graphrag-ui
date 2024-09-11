@@ -22,7 +22,7 @@ This project is currently an upgrade based on the work of [severian42](https://g
 
 ![GraphRAG UI](./assets/image1.png)
 
-### Visualize Graph 
+### Visualize Graph (GIF image)
 
 ![GraphRAG UI](./assets/image2.gif)
 
