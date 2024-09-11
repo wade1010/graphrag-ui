@@ -583,7 +583,7 @@ def find_latest_graph_file(root_dir):
     return latest_file
 
 def update_visualization(folder_name, file_name, layout_type, node_size, edge_width, node_color_attribute, color_scheme, show_labels, label_size):
-    root_dir = "./indexing"
+    root_dir = ROOT_DIR
     if not folder_name or not file_name:
         return None, "Please select a folder and a GraphML file."
     file_name = file_name.split("] ")[1] if "]" in file_name else file_name  # Remove file type prefix
@@ -1117,19 +1117,19 @@ def list_folder_contents(folder_path):
     return contents
 
 def update_output_folder_list():
-    root_dir = "./"
+    root_dir = ROOT_DIR
     folders = list_output_folders(root_dir)
     return gr.update(choices=folders, value=folders[0] if folders else None)
 
 def update_folder_content_list(folder_name):
-    root_dir = "./"
+    root_dir = ROOT_DIR
     if not folder_name:
         return gr.update(choices=[])
     contents = list_folder_contents(os.path.join(root_dir, "output", folder_name, "artifacts"))
     return gr.update(choices=contents)
 
 def handle_content_selection(folder_name, selected_item):
-    root_dir = "./"
+    root_dir = ROOT_DIR
     if isinstance(selected_item, list) and selected_item:
         selected_item = selected_item[0]  # Take the first item if it's a list
     
@@ -1149,7 +1149,7 @@ def handle_content_selection(folder_name, selected_item):
         return gr.update(), "", ""
 
 def initialize_selected_folder(folder_name):
-    root_dir = "./"
+    root_dir = ROOT_DIR
     if not folder_name:
         return "Please select a folder first.", gr.update(choices=[])
     folder_path = os.path.join(root_dir, "output", folder_name, "artifacts")
@@ -1666,7 +1666,7 @@ def create_gradio_interface():
         save_btn.click(fn=save_file_content, inputs=[file_list, file_content], outputs=[operation_status, log_output])
 
         refresh_folder_btn.click(
-            fn=lambda: gr.update(choices=list_output_folders("./indexing")),
+            fn=lambda: gr.update(choices=list_output_folders(ROOT_DIR)),
             outputs=[selected_folder]
         )
 
