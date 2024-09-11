@@ -58,7 +58,7 @@ GraphRAG-UI 是 [GraphRAG](https://github.com/microsoft/graphrag) 的用户友�
 
 4.  启动
 
-    - 纯净版
+    - **纯净版**
 
         该版本只做索引、Prompt Tuning 和文件管理，没有查询功能。
         ```bash
@@ -66,12 +66,12 @@ GraphRAG-UI 是 [GraphRAG](https://github.com/microsoft/graphrag) 的用户友�
         或者
         python index_app.py
         ```
-    - 综合版
+    - **综合版**
 
         该版本在纯净版的基础上增加了可视化图表、配置管理和使用 GraphRAG 聊天。
         ```bash
         python app.py
         ```
 6. 访问 UI
-    - 纯净版： `http://localhost:7860`
-    - 综合版： `http://localhost:7862`
+    - **纯净版**： `http://localhost:7860`
+    - **综合版**： `http://localhost:7862`

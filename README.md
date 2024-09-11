@@ -55,19 +55,21 @@ This project is currently an upgrade based on the work of [severian42](https://g
     ```
 
 4. Start the UI:
-    - Clean version
+    - **Clean version**
+
         This version only supports indexing, Prompt Tuning, and file management, without query functionality.
         ```bash
         gradio index_app.py
         or
         python index_app.py
         ```
-    - Comprehensive version
+    - **Comprehensive version**
+
         This version adds visualizations, configuration management, and GraphRAG chat functionality on top of the clean version.
         ```bash
         python app.py
         ```
 
 6. Access the UI:
-    - Clean version: `http://localhost:7860`
-    - Comprehensive version: `http://localhost:7862`
+    - **Clean version**: `http://localhost:7860`
+    - **Comprehensive version**: `http://localhost:7862`
