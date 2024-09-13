@@ -3,3 +3,4 @@ indexing/prompt_tuning_config.yaml
 __pycache__
 indexing/cache
 .vscode
+setup.py
