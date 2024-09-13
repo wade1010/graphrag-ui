@@ -821,7 +821,7 @@ def update_llm_settings(llm_model, embeddings_model, context_window, system_mess
         update_env_file("MAX_TOKENS", str(max_tokens))
         
         # Reload environment variables
-        load_dotenv(override=True)
+        load_dotenv(dotenv_path=env_file, override=True)
         
         return "LLM and embeddings settings updated successfully in both settings.yaml and .env files."
     except Exception as e:
@@ -1493,11 +1493,11 @@ def create_gradio_interface():
                         update_settings_btn = gr.Button("Update LLM Settings", variant="primary")
                         llm_settings_status = gr.Textbox(label="Status", interactive=False)
 
-                        llm_base_url.change(
-                            fn=update_model_choices,
-                            inputs=[llm_base_url, llm_api_key, llm_service_type, gr.Textbox(value='llm', visible=False)],
-                            outputs=llm_model_dropdown
-                        )
+                        # llm_base_url.change(
+                        #     fn=update_model_choices,
+                        #     inputs=[llm_base_url, llm_api_key, llm_service_type, gr.Textbox(value='llm', visible=False)],
+                        #     outputs=llm_model_dropdown
+                        # )
                         # Update Embeddings model choices when service type or base URL changes
                         embeddings_service_type.change(
                             fn=update_embeddings_model_choices,
