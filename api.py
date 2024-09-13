@@ -49,17 +49,20 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 # Load environment variables
-load_dotenv('indexing/.env')
-LLM_API_BASE = os.getenv('LLM_API_BASE', '')
+graphrag_indexing_dir = 'indexing'
+project_root = os.path.abspath(os.path.dirname(__file__))
+ROOT_DIR = os.path.join(project_root,graphrag_indexing_dir)
+env_file = os.path.join(ROOT_DIR, '.env')
+load_dotenv(env_file)
+LLM_API_BASE = os.getenv('LLM_API_BASE')
 LLM_MODEL = os.getenv('LLM_MODEL')
 LLM_PROVIDER = os.getenv('LLM_PROVIDER', 'openai').lower()
 EMBEDDINGS_API_BASE = os.getenv('EMBEDDINGS_API_BASE', '')
 EMBEDDINGS_MODEL = os.getenv('EMBEDDINGS_MODEL')
 EMBEDDINGS_PROVIDER = os.getenv('EMBEDDINGS_PROVIDER', 'openai').lower()
-INPUT_DIR = os.getenv('INPUT_DIR', './indexing/output')
-ROOT_DIR = os.getenv('ROOT_DIR', 'indexing')
+OUTPUT_DIR = os.getenv('OUTPUT_DIR')
 PORT = int(os.getenv('API_PORT', 8012))
-LANCEDB_URI = f"{INPUT_DIR}/lancedb"
+LANCEDB_URI = f"{ROOT_DIR}/lancedb"
 COMMUNITY_REPORT_TABLE = "create_final_community_reports"
 ENTITY_TABLE = "create_final_nodes"
 ENTITY_EMBEDDING_TABLE = "create_final_entities"
@@ -114,10 +117,10 @@ class ChatCompletionResponse(BaseModel):
     system_fingerprint: Optional[str] = None
 
 def list_output_folders():
-    return [f for f in os.listdir(INPUT_DIR) if os.path.isdir(os.path.join(INPUT_DIR, f))]
+    return [f for f in os.listdir(OUTPUT_DIR) if os.path.isdir(os.path.join(OUTPUT_DIR, f))]
 
 def list_folder_contents(folder_name):
-    folder_path = os.path.join(INPUT_DIR, folder_name, "artifacts")
+    folder_path = os.path.join(OUTPUT_DIR, folder_name, "artifacts")
     if not os.path.exists(folder_path):
         return []
     return [item for item in os.listdir(folder_path) if item.endswith('.parquet')]
@@ -221,7 +224,7 @@ async def load_context(selected_folder, settings):
     """
     logger.info("Loading context data")
     try:
-        input_dir = os.path.join(INPUT_DIR, selected_folder, "artifacts")
+        input_dir = os.path.join(OUTPUT_DIR, selected_folder, "artifacts")
         entity_df = pd.read_parquet(f"{input_dir}/{ENTITY_TABLE}.parquet")
         entity_embedding_df = pd.read_parquet(f"{input_dir}/{ENTITY_EMBEDDING_TABLE}.parquet")
         entities = read_indexer_entities(entity_df, entity_embedding_df, settings['community_level'])
@@ -548,7 +551,7 @@ async def run_graphrag_query(request: ChatCompletionRequest) -> ChatCompletionRe
         query = request.messages[-1].content  # Get the last user message as the query
         
         cmd = ["python", "-m", "graphrag.query"]
-        cmd.extend(["--data", f"./indexing/output/{query_options.selected_folder}/artifacts"])
+        cmd.extend(["--data", f"{ROOT_DIR}/output/{query_options.selected_folder}/artifacts"])
         cmd.extend(["--method", query_options.query_type.split('-')[1]])  # 'global' or 'local'
         
         if query_options.community_level:

@@ -61,8 +61,12 @@ import textwrap
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="gradio_client.documentation")
 
+graphrag_indexing_dir = 'indexing'
+project_root = os.path.abspath(os.path.dirname(__file__))
+ROOT_DIR = os.path.join(project_root,graphrag_indexing_dir)
 
-load_dotenv('indexing/.env')
+env_file = os.path.join(ROOT_DIR, '.env')
+load_dotenv(env_file)
 
 # LLM 相关配置
 LLM_API_BASE = os.getenv('LLM_API_BASE')
@@ -77,14 +81,8 @@ EMBEDDINGS_API_KEY = os.getenv('EMBEDDINGS_API_KEY')
 EMBEDDINGS_SERVICE_TYPE = os.getenv('EMBEDDINGS_SERVICE_TYPE')
 
 # 其他配置
-ROOT_DIR = os.getenv('ROOT_DIR', 'indexing')
+ROOT_DIR = os.path.join(project_root,graphrag_indexing_dir)
 INPUT_DIR = os.getenv('INPUT_DIR')
-
-
-
-# Add the project root to the Python path
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.insert(0, project_root)
 
 
 # Set up logging
@@ -147,7 +145,7 @@ def initialize_models():
     # return llm_models, embeddings_models, llm_service_type, embeddings_service_type, llm_api_base, embeddings_api_base, text_embedder
 
 def find_latest_output_folder():
-    root_dir = "./indexing/output"
+    root_dir = os.path.join(ROOT_DIR,'output')
     folders = [f for f in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, f))]
     
     if not folders:
@@ -263,7 +261,7 @@ def update_setting(key, value):
         settings[key] = value
     
     try:
-        with open("indexing/settings.yaml", "w") as f:
+        with open(os.path.join(ROOT_DIR,'"settings.yaml"'), "w") as f:
             yaml.dump(settings, f, default_flow_style=False)
         return f"Setting '{key}' updated successfully"
     except Exception as e:
@@ -421,7 +419,7 @@ def construct_cli_args(query_type, preset, community_level, response_type, custo
     if not selected_folder:
         raise ValueError("No folder selected. Please select an output folder before querying.")
 
-    artifacts_folder = os.path.join(f"./{ROOT_DIR}/output", selected_folder, "artifacts")
+    artifacts_folder = os.path.join(f"{ROOT_DIR}/output", selected_folder, "artifacts")
     if not os.path.exists(artifacts_folder):
         raise ValueError(f"Artifacts folder not found in {artifacts_folder}")
 
@@ -466,7 +464,7 @@ def construct_cli_args(query_type, preset, community_level, response_type, custo
 
 def upload_file(file):
     if file is not None:
-        input_dir = os.path.join("indexing", "input")
+        input_dir = os.path.join(ROOT_DIR, "input")
         os.makedirs(input_dir, exist_ok=True)
         
         # Get the original filename from the uploaded file
@@ -489,7 +487,7 @@ def upload_file(file):
     return status, gr.update(choices=updated_file_list), update_logs()
 
 def list_input_files():
-    input_dir = os.path.join("indexing", "input")
+    input_dir = os.path.join(ROOT_DIR, "input")
     files = []
     if os.path.exists(input_dir):
         files = os.listdir(input_dir)
@@ -548,7 +546,7 @@ def save_file_content(file_path, content):
     return status, update_logs()
 
 def manage_data():
-    db = lancedb.connect("./indexing/lancedb")
+    db = lancedb.connect(os.path.join(ROOT_DIR,"lancedb"))
     tables = db.table_names()
     table_info = ""
     if tables:
@@ -821,8 +819,7 @@ def update_llm_settings(llm_model, embeddings_model, context_window, system_mess
         return f"Error updating LLM and embeddings settings: {str(e)}"
 
 def update_env_file(key, value):
-    env_path = 'indexing/.env'
-    with open(env_path, 'r') as file:
+    with open(env_file, 'r') as file:
         lines = file.readlines()
     
     updated = False
@@ -835,7 +832,7 @@ def update_env_file(key, value):
     if not updated:
         lines.append(f"{key}={value}\n")
     
-    with open(env_path, 'w') as file:
+    with open(env_file, 'w') as file:
         file.writelines(lines)
 
 custom_css = """
@@ -1203,7 +1200,7 @@ def refresh_indexing():
 
 def run_indexing(root_dir, config_file, verbose, nocache, resume, reporter, emit_formats, custom_args):
     if not root_dir or root_dir == '.' or root_dir == './':
-        root_dir = './indexing'
+        root_dir = ROOT_DIR
     elif not os.path.exists(root_dir):
         logging.error(f"Root directory '{root_dir}' does not exist.")
         return ("\n".join(["Root directory does not exist."]),
@@ -1354,7 +1351,7 @@ def create_gradio_interface():
                         
 
                     with gr.TabItem("Indexing"):
-                        root_dir = gr.Textbox(label="Root Directory", value=f"./{ROOT_DIR}")
+                        root_dir = gr.Textbox(label="Root Directory", value=f"{ROOT_DIR}")
                         config_file = gr.File(label="Config File (optional)")
                         with gr.Row():
                             verbose = gr.Checkbox(label="Verbose", value=True)
@@ -1590,7 +1587,7 @@ def create_gradio_interface():
                         )
                         selected_folder = gr.Dropdown(
                             label="Select Index Folder to Chat With",
-                            choices=list_output_folders("./indexing"),
+                            choices=list_output_folders(ROOT_DIR),
                             value=None,
                             interactive=True
                         )

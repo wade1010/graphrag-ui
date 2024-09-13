@@ -19,12 +19,16 @@ log_queue = queue.Queue()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-load_dotenv('indexing/.env')
+graphrag_indexing_dir = 'indexing'
+project_root = os.path.abspath(os.path.dirname(__file__))
+ROOT_DIR = os.path.join(project_root,graphrag_indexing_dir)
+env_file = os.path.join(ROOT_DIR, '.env')
+
+load_dotenv(env_file)
 
 API_BASE_URL = os.getenv('API_BASE_URL', 'http://localhost:8012')
 LLM_API_BASE = os.getenv('LLM_API_BASE', 'http://localhost:11434')
 EMBEDDINGS_API_BASE = os.getenv('EMBEDDINGS_API_BASE', 'http://localhost:11434')
-ROOT_DIR = os.getenv('ROOT_DIR', 'indexing')  
 
 # Data models
 class IndexingRequest(BaseModel):
@@ -41,8 +45,8 @@ class IndexingRequest(BaseModel):
     custom_args: Optional[str] = None
 
 class PromptTuneRequest(BaseModel):
-    root: str = "./{ROOT_DIR}"
-    config: str = "./{ROOT_DIR}/settings.yaml"
+    root: str = "{ROOT_DIR}"
+    config: str = "{ROOT_DIR}/settings.yaml"
     domain: Optional[str] = None
     method: str = "random"
     limit: int = 15
@@ -50,7 +54,7 @@ class PromptTuneRequest(BaseModel):
     max_tokens: int = 2000
     chunk_size: int = 200
     no_entity_types: bool = False
-    output: str = "./{ROOT_DIR}/prompts"
+    output: str = "{ROOT_DIR}/prompts"
 
 class QueueHandler(logging.Handler):
     def __init__(self, log_queue):
@@ -297,8 +301,10 @@ def find_latest_output_folder():
     root_dir =f"{ROOT_DIR}/output"
     folders = [f for f in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, f))]
     
-    if not folders:
+    if folders is None:
         raise ValueError("No output folders found")
+    elif len(folders) == 0:
+        return None,None
     
     # Sort folders by creation time, most recent first
     sorted_folders = sorted(folders, key=lambda x: os.path.getctime(os.path.join(root_dir, x)), reverse=True)
@@ -342,6 +348,8 @@ def initialize_data():
     
     try:
         latest_output_folder, timestamp = find_latest_output_folder()
+        if latest_output_folder is None:
+            return None 
         artifacts_folder = os.path.join(latest_output_folder, "artifacts")
         
         for df_name, file_prefix in tables.items():
