@@ -943,7 +943,7 @@ async def indexing_status():
 
 def main():
     parser = argparse.ArgumentParser(description="Launch the GraphRAG API server")
-    parser.add_argument("--host", type=str, default="127.0.0.1", help="Host to bind the server to")
+    parser.add_argument("--host", type=str, default="0.0.0.0", help="Host to bind the server to")
     parser.add_argument("--port", type=int, default=PORT, help="Port to bind the server to")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload mode")
     args = parser.parse_args()

@@ -1098,7 +1098,7 @@ def save_prompt_tuning_config(root, domain, method, limit, language, max_tokens,
 demo = create_interface()
 
 def main():
-    demo.launch(server_port=7860, share=False)
+    demo.launch(server_name='0.0.0.0', server_port=7860, share=False)
 
 if __name__ == "__main__":
     main()
