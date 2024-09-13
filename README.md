@@ -37,24 +37,33 @@ This project is currently an upgrade based on the work of [severian42](https://g
     conda create -n graphrag-ui -y
     conda activate graphrag-ui
     ```
+2. Install Ollama:
 
-2. Clone the repository:
+    Visit [Ollama's website](https://ollama.com/) for installation instructions.
+    
+    Or Linux, run:
+
+   ```bash
+   curl -fsSL https://ollama.com/install.sh | sh
+   ```
+
+3. Clone the repository:
    ```bash
    git clone https://github.com/wade1010/graphrag-ui.git
    ```
 
-3. Install the required packages:
+4. Install the required packages:
     ```bash
     cd graphrag-ui
     pip install -r requirements.txt
     ```
 
-3. Start the API server:
+5. Start the API server:
     ```bash
     python api.py --host 0.0.0.0 --port 8012 --reload
     ```
 
-4. Start the UI:
+6. Start the UI:
     - **Clean version**
 
         This version only supports indexing, Prompt Tuning, and file management, without query functionality.
@@ -70,6 +79,6 @@ This project is currently an upgrade based on the work of [severian42](https://g
         python app.py
         ```
 
-6. Access the UI:
+7. Access the UI:
     - **Clean version**: `http://localhost:7860`
     - **Comprehensive version**: `http://localhost:7862`

@@ -38,25 +38,34 @@ GraphRAG-UI 是 [GraphRAG](https://github.com/microsoft/graphrag) 的用户友�
     conda activate graphrag-ui
     ```
 
-2. 克隆存储库:
+
+2. 安装ollama:
+
+    访问 [Ollama官网](https://ollama.com/) 来安装。如果是 Linux ，可以直接运行下面命令
+
+   ```bash
+   curl -fsSL https://ollama.com/install.sh | sh
+   ```
+
+3. 克隆存储库:
 
    ```bash
    git clone https://github.com/wade1010/graphrag-ui.git
    ```
 
 
-3. 安装所需的软件包：
+4. 安装所需的软件包：
     ```bash
     cd graphrag-ui
     pip install -r requirements.txt
     ```
 
-3. 启动API服务器
+5. 启动API服务器
     ```bash
     python api.py --host 0.0.0.0 --port 8012 --reload
     ```
 
-4.  启动
+6.  启动
 
     - **纯净版**
 
@@ -72,6 +81,6 @@ GraphRAG-UI 是 [GraphRAG](https://github.com/microsoft/graphrag) 的用户友�
         ```bash
         python app.py
         ```
-6. 访问 UI
+7. 访问 UI
     - **纯净版**： `http://localhost:7860`
     - **综合版**： `http://localhost:7862`
