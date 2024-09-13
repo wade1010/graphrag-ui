@@ -811,10 +811,12 @@ def update_llm_settings(llm_model, embeddings_model, context_window, system_mess
         # Update .env file
         update_env_file("LLM_API_BASE", llm_api_base)
         update_env_file("LLM_API_KEY", llm_api_key)
-        update_env_file("LLM_MODEL", llm_model)
+        if llm_model != "${LLM_MODEL}":
+            update_env_file("LLM_MODEL", llm_model)
         update_env_file("EMBEDDINGS_API_BASE", embeddings_api_base)
         update_env_file("EMBEDDINGS_API_KEY", embeddings_api_key)
-        update_env_file("EMBEDDINGS_MODEL", embeddings_model)
+        if embeddings_model != "${EMBEDDINGS_MODEL}":
+            update_env_file("EMBEDDINGS_MODEL", embeddings_model)
         update_env_file("CONTEXT_WINDOW", str(context_window))
         update_env_file("SYSTEM_MESSAGE", system_message)
         update_env_file("TEMPERATURE", str(temperature))
@@ -1505,11 +1507,11 @@ def create_gradio_interface():
                             outputs=embeddings_model_dropdown
                         )
 
-                        embeddings_base_url.change(
-                            fn=update_model_choices,
-                            inputs=[embeddings_base_url, embeddings_api_key, embeddings_service_type, gr.Textbox(value='embeddings', visible=False)],
-                            outputs=embeddings_model_dropdown
-                        )
+                        # embeddings_base_url.change(
+                        #     fn=update_model_choices,
+                        #     inputs=[embeddings_base_url, embeddings_api_key, embeddings_service_type, gr.Textbox(value='embeddings', visible=False)],
+                        #     outputs=embeddings_model_dropdown
+                        # )
 
                         update_settings_btn.click(
                             fn=update_llm_settings,
