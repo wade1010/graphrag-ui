@@ -1,3 +1,9 @@
+import sys
+try:
+    import graphrag
+except ImportError:
+    print("The 'graphrag' package is not installed. Please install it using 'pip install graphrag'.Since the dependency package `aiofiles` of `graphrag` conflicts with the requirements of `gradio`, it is necessary to manually install `graphrag` separately.")
+    sys.exit(1)
 import gradio as gr
 from gradio.helpers import Progress
 import asyncio
@@ -27,7 +33,6 @@ from openai import OpenAI
 from openai import AsyncOpenAI
 import pyarrow.parquet as pq
 import pandas as pd
-import sys
 import colorsys
 from dotenv import load_dotenv, set_key
 import argparse
@@ -148,8 +153,10 @@ def find_latest_output_folder():
     root_dir = os.path.join(ROOT_DIR,'output')
     folders = [f for f in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, f))]
     
-    if not folders:
+    if folders is None:
         raise ValueError("No output folders found")
+    elif len(folders) == 0:
+        return None,None
     
     # Sort folders by creation time, most recent first
     sorted_folders = sorted(folders, key=lambda x: os.path.getctime(os.path.join(root_dir, x)), reverse=True)
@@ -193,6 +200,8 @@ def initialize_data():
     
     try:
         latest_output_folder, timestamp = find_latest_output_folder()
+        if latest_output_folder is None:
+            return None 
         artifacts_folder = os.path.join(latest_output_folder, "artifacts")
         
         for df_name, file_prefix in tables.items():
@@ -1802,6 +1811,9 @@ async def main():
 demo = create_gradio_interface()
 app = demo.app
 
-if __name__ == "__main__":
+def main():
     initialize_data()
     demo.launch(server_port=7862, share=False)
+
+if __name__ == "__main__":
+    main()

@@ -1,3 +1,9 @@
+import sys
+try:
+    import graphrag
+except ImportError:
+    print("The 'graphrag' package is not installed. Please install it using 'pip install graphrag'.Since the dependency package `aiofiles` of `graphrag` conflicts with the requirements of `gradio`, it is necessary to manually install `graphrag` separately.")
+    sys.exit(1)
 from dotenv import load_dotenv
 import os
 import asyncio
@@ -18,7 +24,10 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any, Union
 from contextlib import asynccontextmanager
-from web import DuckDuckGoSearchAPIWrapper
+try:
+    from web import DuckDuckGoSearchAPIWrapper
+except ImportError:
+    from .web import DuckDuckGoSearchAPIWrapper
 from functools import lru_cache
 import requests
 import subprocess
@@ -932,7 +941,7 @@ async def indexing_status():
         "logs": list(indexing_logs)
     }
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Launch the GraphRAG API server")
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Host to bind the server to")
     parser.add_argument("--port", type=int, default=PORT, help="Port to bind the server to")
@@ -940,9 +949,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     import uvicorn
+
+    if __name__ == "__main__":
+        app_name = 'api:app'
+    else:
+        app_name = 'graphrag_ui.api:app'
+
     uvicorn.run(
-        "api:app",
+        app_name,
         host=args.host,
         port=args.port,
         reload=args.reload
     )
+
+if __name__ == "__main__":
+    main()

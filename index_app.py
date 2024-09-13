@@ -1,3 +1,9 @@
+import sys
+try:
+    import graphrag
+except ImportError:
+    print("The 'graphrag' package is not installed. Please install it using 'pip install graphrag'.Since the dependency package `aiofiles` of `graphrag` conflicts with the requirements of `gradio`, it is necessary to manually install `graphrag` separately.")
+    sys.exit(1)
 import gradio as gr
 import requests
 import logging
@@ -1091,5 +1097,8 @@ def save_prompt_tuning_config(root, domain, method, limit, language, max_tokens,
 
 demo = create_interface()
 
-if __name__ == "__main__":
+def main():
     demo.launch(server_port=7860, share=False)
+
+if __name__ == "__main__":
+    main()
