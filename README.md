@@ -30,14 +30,52 @@ This project is currently an upgrade based on the work of [severian42](https://g
 
 ![GraphRAG UI](./assets/image3.png)
 
-## Installation and Usage
+## Usage with pip
+
+1. Install Ollama (optional):
+
+    Visit the [Ollama website](https://ollama.com/) to install. If you're on Linux, you can run the following command directly:
+
+    ```bash
+    curl -fsSL https://ollama.com/install.sh | sh
+    ```
+
+2. Install this software via pip:
+
+    ```bash
+    pip install graphrag-ui
+    or
+    pip install graphrag-ui -i https://pypi.org/simple
+    ```
+
+3. Start the API Server
+
+    ```bash
+    graphrag-ui-server
+    ```
+
+4. Start the UI
+
+    Start the comprehensive UI
+
+    ```bash
+    graphrag-ui
+    ```
+
+    Or start the pure UI
+
+    ```bash 
+    graphrag-ui-pure
+    ```
+
+## Source code installation and usage
 
 1. Create and activate a new conda environment:
     ```bash
     conda create -n graphrag-ui -y
     conda activate graphrag-ui
     ```
-2. Install Ollama:
+2. Install Ollama（optional）:
 
     Visit [Ollama's website](https://ollama.com/) for installation instructions.
     

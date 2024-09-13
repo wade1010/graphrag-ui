@@ -30,7 +30,47 @@ GraphRAG-UI 是 [GraphRAG](https://github.com/microsoft/graphrag) 的用户友�
 
 ![GraphRAG UI](./assets/image3.png)
 
-## 安装使用
+## pip 安装使用
+
+1. 安装ollama（可选）:
+
+    访问 [Ollama官网](https://ollama.com/) 来安装。如果是 Linux ，可以直接运行下面命令
+
+   ```bash
+   curl -fsSL https://ollama.com/install.sh | sh
+   ```
+
+2. pip 安装本软件：
+
+   ```bash
+   pip install graphrag-ui
+   或者
+   pip install graphrag-ui -i https://pypi.org/simple
+   ```
+
+3. 启动 API Server
+
+    ```bash
+    graphrag-ui-server
+   ```
+
+4. 启动 UI
+
+    启动综合版 UI
+
+    ```bash
+    graphrag-ui
+   ```
+
+    或启动纯净版 UI
+
+    ```bash
+    graphrag-ui-pure
+   ```
+
+
+
+## 源码安装使用
 
 1. 创建并激活一个新的conda环境：
     ```bash
@@ -39,7 +79,7 @@ GraphRAG-UI 是 [GraphRAG](https://github.com/microsoft/graphrag) 的用户友�
     ```
 
 
-2. 安装ollama:
+2. 安装ollama（可选）:
 
     访问 [Ollama官网](https://ollama.com/) 来安装。如果是 Linux ，可以直接运行下面命令
 
