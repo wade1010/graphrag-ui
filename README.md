@@ -120,3 +120,7 @@ This project is currently an upgrade based on the work of [severian42](https://g
 7. Access the UI:
     - **Clean version**: `http://localhost:7860`
     - **Comprehensive version**: `http://localhost:7862`
+
+## Installation and Usage Blog
+
+[https://blog.csdn.net/wade1010/article/details/142374956](https://blog.csdn.net/wade1010/article/details/142374956)

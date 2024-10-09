@@ -124,3 +124,7 @@ GraphRAG-UI 是 [GraphRAG](https://github.com/microsoft/graphrag) 的用户友�
 7. 访问 UI
     - **纯净版**： `http://localhost:7860`
     - **综合版**： `http://localhost:7862`
+
+## 安装使用博客
+
+[https://blog.csdn.net/wade1010/article/details/142374956](https://blog.csdn.net/wade1010/article/details/142374956)
