@@ -72,7 +72,7 @@ This project is currently an upgrade based on the work of [severian42](https://g
 
 1. Create and activate a new conda environment:
     ```bash
-    conda create -n graphrag-ui -y
+    conda create -n graphrag-ui -y python=3.10
     conda activate graphrag-ui
     ```
 2. Install Ollama（optional）:
