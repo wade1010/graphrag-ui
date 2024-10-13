@@ -74,7 +74,7 @@ GraphRAG-UI 是 [GraphRAG](https://github.com/microsoft/graphrag) 的用户友�
 
 1. 创建并激活一个新的conda环境：
     ```bash
-    conda create -n graphrag-ui -y
+    conda create -n graphrag-ui -y python=3.10
     conda activate graphrag-ui
     ```
 
